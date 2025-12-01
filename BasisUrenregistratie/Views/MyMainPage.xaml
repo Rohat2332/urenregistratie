@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="BasisUrenregistratie.Views.MyMainPage"
+                    xmlns:ContentView="clr-namespace:BasisUrenregistratie.Views"
+                 Title="MyMainPage">
+    
+        <ContentPage.ToolbarItems>
+            <ToolbarItem Text="Page1"
+                         Clicked="OnPage1Clicked" />
+            <ToolbarItem Text="Page1"
+                         Clicked="OnPage2Clicked" />
+        </ContentPage.ToolbarItems>
+        <VerticalStackLayout>
+            <ContentView x:Name="SubPage"/>
+        </VerticalStackLayout>
+    
+    <!-- <ContentPage.Content> -->
+    <!-- -->
+    <!-- </ContentPage.Content> -->
+</ContentPage>
