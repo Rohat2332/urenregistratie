@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasisUrenregistratie", "BasisUrenregistratie\BasisUrenregistratie.csproj", "{8CA82CED-BFCD-4231-8C85-91CB93627833}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrenRegistratie.Core", "UrenRegistratie.Core\UrenRegistratie.Core.csproj", "{84242C15-7B72-4BDA-B354-69CAF98B54A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HourRegistration.Core", "HourRegistration.Core\HourRegistration.Core.csproj", "{84242C15-7B72-4BDA-B354-69CAF98B54A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
