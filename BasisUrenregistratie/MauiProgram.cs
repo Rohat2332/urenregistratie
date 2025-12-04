@@ -1,5 +1,9 @@
 ﻿using CommunityToolkit.Maui;
+using HourRegistartion.Core.Data.Repositories;
 using Microsoft.Extensions.Logging;
+using UrenRegistratie.Core.Interfaces.Repositories;
+using UrenRegistratie.Core.Interfaces.Services;
+using UrenRegistratie.Core.Services;
 
 namespace BasisUrenregistratie;
 
@@ -20,8 +24,21 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-        builder.Services.AddSingleton<BasisUrenregistratie.ViewModels.EmployeeOverviewViewModel>();
-        builder.Services.AddSingleton<BasisUrenregistratie.Views.EmployeeOverview>();
+        // --- Dependency Injection Configuration ---
+        
+        //Repositories (Data Access)
+        builder.Services.AddSingleton<IHourReceiptRepository, HourReceiptsRepository>();
+        builder.Services.AddSingleton<IUserRepository, UserRepository>();
+        
+        //Services (Business Logic)
+        builder.Services.AddSingleton<IHourReceiptService, HourReceiptService>();
+        builder.Services.AddSingleton<IUserService, UserService>();
+        
+        // ViewModels (Data Presentation Logic)
+        builder.Services.AddTransient<ViewModels.EmployeeOverviewViewModel>();
+        
+        //Views (Pages)
+        builder.Services.AddTransient<Views.EmployeeOverview>();
 
         return builder.Build();
     }

@@ -6,14 +6,10 @@
              x:Class="BasisUrenregistratie.Views.EmployeeOverview"
              Title="Werknemer Overzicht">
 
-    <ContentPage.BindingContext>
-        <viewModels:EmployeeOverviewViewModel />
-    </ContentPage.BindingContext>
-
     <ContentPage.Content>
         <ScrollView>
             <VerticalStackLayout Spacing="10" Padding="20">
-                
+
                 <Border Stroke="Black"
                         StrokeThickness="3"
                         BackgroundColor="White"
@@ -22,41 +18,41 @@
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="15" />
                     </Border.StrokeShape>
-                    
+
                     <CollectionView ItemsSource="{Binding WeekOverview}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:WeeklyDaySummary">
                                 <!-- De rij voor elke dag (een Grid) -->
-                                    <Grid ColumnDefinitions="3*,2*"
-                                          Padding="0,2">
-                                    
-                                        <!-- Day name, Day number and month name-->
-                                        <Border Stroke="black"
-                                                StrokeThickness="3"
-                                                BackgroundColor="white"
-                                                Padding="10,10,10,10">
-                                            
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="15"/>
-                                            </Border.StrokeShape>
-                                            
-                                            <HorizontalStackLayout Spacing="10" >
-                                                <Border Stroke="#0096FF"
-                                                        BackgroundColor="#0096FF"
-                                                        Padding="10,10,10,10">
-                                                    
-                                                    <Border.StrokeShape>
-                                                        <RoundRectangle CornerRadius="10"/>
-                                                    </Border.StrokeShape>
-                                                    
-                                                    <Label Text="{Binding Date, StringFormat='{0:dddd d MMMM}'}"
-                                                           FontSize="Medium"
-                                                           TextColor="White"
-                                                           VerticalOptions="Center"/>
-                                                </Border>
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                    </Grid>
+                                <Grid ColumnDefinitions="3*,2*"
+                                      Padding="0,2">
+
+                                    <!-- Day name, Day number and month name-->
+                                    <Border Stroke="black"
+                                            StrokeThickness="3"
+                                            BackgroundColor="white"
+                                            Padding="10,10,10,10">
+
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="15" />
+                                        </Border.StrokeShape>
+
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Border Stroke="#0096FF"
+                                                    BackgroundColor="#0096FF"
+                                                    Padding="10,10,10,10">
+
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10" />
+                                                </Border.StrokeShape>
+
+                                                <Label Text="{Binding Date, StringFormat='{0:dddd d MMMM}'}"
+                                                       FontSize="Medium"
+                                                       TextColor="White"
+                                                       VerticalOptions="Center" />
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
