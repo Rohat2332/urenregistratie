@@ -1,17 +1,18 @@
-﻿using UrenRegistratie.Core.Interfaces.Services;
+﻿using Microsoft.Extensions.Configuration;
+using UrenRegistratie.Core.Interfaces.Services;
 
 namespace UrenRegistratie.Core.Services;
 
 public class ConfigurationService : IConfigurationService
 {
-    private readonly IConfigurationService _configuration;
+    private readonly IConfiguration _configuration;
 
-    public ConfigurationService(IConfigurationService configuration)
+    public ConfigurationService(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-
+    
     public string GetSetting(string key, string defaultValue = "")
     {
         return _configuration[key] ?? defaultValue;
