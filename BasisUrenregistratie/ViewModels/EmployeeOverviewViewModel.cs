@@ -90,15 +90,6 @@ public class EmployeeOverviewViewModel
         // Set the start (Monday) and end (Sunday) of the week
         StartOfTheWeek = today.AddDays(-daysSinceMonday);
         EndOfTheWeek = StartOfTheWeek.AddDays(6);
-        
-        // --- DATA PROCESSING STEP ---
-        // Group the loaded hour receipts by their date and calculate the total hours for each day.
-        var aggregatedHours = HourReceipts
-            .Where(h => h.Date.Date >= StartOfTheWeek.Date && h.Date.Date <= EndOfTheWeek.Date)
-            .GroupBy(h => h.Date.Date) // Group by the date part only
-            .ToDictionary(g => g.Key, 
-                // FIX: Sum the HoursWorked and convert MinutesWorked to fractional hours (MinutesWorked / 60.0)
-                g => g.Sum(h => h.HoursWorked + (h.MinutesWorked / 60.0)));
 
         // 3. Populate the WeekOverview collection for every day of the week (7 days)
         for (int i = 0; i < 7; i++)
