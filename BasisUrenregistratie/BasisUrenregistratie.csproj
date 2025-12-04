@@ -65,6 +65,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\HourRegistration.Core.Data\HourRegistration.Core.Data.csproj" />
       <ProjectReference Include="..\HourRegistration.Core\HourRegistration.Core.csproj" />
     </ItemGroup>
 
