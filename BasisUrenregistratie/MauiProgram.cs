@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using HourRegistartion.Core.Data.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UrenRegistratie.Core.Interfaces.Repositories;
 using UrenRegistratie.Core.Interfaces.Services;
@@ -33,13 +34,17 @@ public static class MauiProgram
         //Services (Business Logic)
         builder.Services.AddSingleton<IHourReceiptService, HourReceiptService>();
         builder.Services.AddSingleton<IUserService, UserService>();
+        builder.Services.AddSingleton<IConfigurationService, ConfigurationService > ();
         
         // ViewModels (Data Presentation Logic)
         builder.Services.AddTransient<ViewModels.EmployeeOverviewViewModel>();
         
         //Views (Pages)
         builder.Services.AddTransient<Views.EmployeeOverview>();
-
+        
+        //App settings
+        builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+        
         return builder.Build();
     }
 }
