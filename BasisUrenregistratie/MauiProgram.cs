@@ -39,6 +39,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IHourReceiptService, HourReceiptService>();
         builder.Services.AddSingleton<IUserService, UserService>();
         builder.Services.AddSingleton<IConfigurationService, ConfigurationService > ();
+        builder.Services.AddSingleton<IWeeklySummaryService, WeeklySummaryService>();
         
         // ViewModels (Data Presentation Logic)
         builder.Services.AddTransient<ViewModels.EmployeeOverviewViewModel>();

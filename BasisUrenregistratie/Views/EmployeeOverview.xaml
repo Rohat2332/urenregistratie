@@ -2,9 +2,13 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             
              xmlns:viewModels="clr-namespace:BasisUrenregistratie.ViewModels"
-             xmlns:summaries="using:BasisUrenregistratie.ViewModels.summaries"
+             
+             xmlns:coreModels="clr-namespace:UrenRegistratie.Core.Models;assembly=HourRegistration.Core"
+             
              x:Class="BasisUrenregistratie.Views.EmployeeOverview"
+             x:DataType="viewModels:EmployeeOverviewViewModel"
              Title="Werknemer Overzicht">
 
     <ContentPage.Content>
@@ -22,7 +26,7 @@
 
                     <CollectionView ItemsSource="{Binding WeekOverview}">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="summaries:WeeklyDaySummary">
+                            <DataTemplate x:DataType="coreModels:WeeklyDaySummary">
                                 <!-- De rij voor elke dag (een Grid) -->
                                 <Grid ColumnDefinitions="3*,2*"
                                       Padding="0,2">
