@@ -28,7 +28,7 @@ public class EmployeeOverviewViewModel
     private readonly IUserService _userService;
     private User? _user;
     private ObservableCollection<HourReceipt> HourReceipts { get; set; } = [];
-    private ObservableCollection<WeeklyDaySummary> WeekOverview { get; set; } = [];
+    public ObservableCollection<WeeklyDaySummary> WeekOverview { get; set; } = [];
     private DateTime StartOfTheWeek { get; set; }
     public DateTime EndOfTheWeek { get; private set; }
     
@@ -38,19 +38,29 @@ public class EmployeeOverviewViewModel
         _hourReceiptService = hourReceiptService;
         _userService = userService;
         SetUser();
-        if (_user != null) LoadUserHourReceipts(_user.Id);
+        if (_user != null)
+        {
+            _ = LoadUserHourReceipts(_user.Id);
+        }
         CalculateCurrentWeek();
     }
 
-    private void LoadUserHourReceipts(int userId)
+    private async Task LoadUserHourReceipts(int userId)
     {
-        HourReceipts.Clear();
-        foreach (var hourReceipt in _hourReceiptService.GetAll())
+        try
         {
-            if (hourReceipt.UserId == userId)
+            HourReceipts.Clear();
+            var allHourReceipts = await _hourReceiptService.GetAll();
+            
+            
+            foreach (var hourReceipt in (allHourReceipts).Where(hourReceipt => hourReceipt.UserId == userId))
             {
                 HourReceipts.Add(hourReceipt);
             }
+        }
+        catch (Exception e)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading hour receipts: {e.Message}");
         }
     }
 
@@ -79,29 +89,30 @@ public class EmployeeOverviewViewModel
         StartOfTheWeek = today.AddDays(-daysSinceMonday);
         EndOfTheWeek = StartOfTheWeek.AddDays(6);
 
+        // --- DATA AGGREGATIE ---
+        // Groepeer en aggregeer de uren in de geladen bonnen (HourReceipts)
+        var aggregatedHours = HourReceipts
+            .Where(h => h.Date.Date >= StartOfTheWeek.Date && h.Date.Date <= EndOfTheWeek.Date)
+            .GroupBy(h => h.Date.Date) // Groepeer op datum
+            .ToDictionary(g => g.Key, 
+                // Sum de HoursWorked en MinutesWorked
+                g => g.Sum(h => h.HoursWorked + (h.MinutesWorked / 60.0)));
+
         // 3. Populate the WeekOverview collection for every day of the week (7 days)
         for (var i = 0; i < 7; i++)
         {
             var currentDay = StartOfTheWeek.AddDays(i);
+            double totalHours = 0;
+            
+            // Zoek geaggregeerde uren op, standaard 0 als er niets is gevonden.
+            aggregatedHours.TryGetValue(currentDay.Date, out totalHours);
 
-            foreach (var hourReceipt in HourReceipts)
+            // Voeg EEN ENKELE WeeklyDaySummary toe voor de dag
+            WeekOverview.Add(new WeeklyDaySummary
             {
-                if (hourReceipt.Date == currentDay.Date)
-                {
-                    WeekOverview.Add(new WeeklyDaySummary
-                    {
-                        Date = currentDay,
-                        HourReceipt = hourReceipt
-                    });
-                }
-                else
-                {
-                    WeekOverview.Add(new WeeklyDaySummary
-                    {
-                        Date = currentDay
-                    });
-                }
-            }
+                Date = currentDay,
+                // TotalHours = totalHours
+            });
         }
     }
 
