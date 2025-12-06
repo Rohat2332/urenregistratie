@@ -1,36 +1,90 @@
-﻿using UrenRegistratie.Core.Interfaces.Repositories;
+﻿using System.Diagnostics;
+using MySqlConnector;
+using UrenRegistratie.Core.Interfaces.Repositories;
 using UrenRegistratie.Core.Models;
 
-namespace HourRegistartion.Core.Data.Repositories;
+namespace HourRegistration.Core.Data.Repositories;
 
 public class HourReceiptsRepository : IHourReceiptRepository
 {
-    private readonly List<HourReceipt> _hoursReceipts;
+    private readonly DatabaseConnection _databaseConnection;
+    private  List<HourReceipt> _hoursReceipts;
 
-    public HourReceiptsRepository()
+    public HourReceiptsRepository(DatabaseConnection databaseConnection)
     {
-        _hoursReceipts =
-        [
-            new HourReceipt(0,0,new DateTime(2025, 12,4),"no Entry"),
-            new HourReceipt(1,0,new DateTime(2025, 12,3),"no Entry"),
-            new HourReceipt(2,0,new DateTime(2025, 12,2),"no Entry"),
-            new HourReceipt(3,0,new DateTime(2025, 12,1),"no Entry")
-        ];
+        _databaseConnection =  databaseConnection;
+        _hoursReceipts = [];
     }
 
-    public HourReceipt? GetById(int id)
+    public async Task<List<HourReceipt>> GetAllByUserId(int userId)
     {
-        return _hoursReceipts.Find(h => h.Id == id);
+        _hoursReceipts = new List<HourReceipt>();
+        
+        const string query = "SELECT * FROM hour_receipts WHERE UserId = @UserId";
+
+        try
+        {
+            await using var connection = await _databaseConnection.GetOpenConnectionAsync();
+            await using var command = new MySqlCommand(query, connection);
+            
+            command.Parameters.AddWithValue("@UserId", userId);
+            
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                _hoursReceipts.Add(MapReaderToHourReceipt(reader));
+            }
+
+            return _hoursReceipts;
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"Error retrieving hour receipts for user {userId}: {e.Message}");
+            throw;
+        }
     }
 
-    public List<HourReceipt> GetAllByUserId(int id)
+    public async Task<List<HourReceipt>> GetAll()
     {
-       return _hoursReceipts.FindAll(h => h.UserId == id);
+        _hoursReceipts = new List<HourReceipt>();
+        
+        const string query = "SELECT * FROM hour_receipts;";
+
+        try
+        {
+            await using var connection = await _databaseConnection.GetOpenConnectionAsync();
+            await using var command = new MySqlCommand(query, connection);
+            
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                _hoursReceipts.Add(MapReaderToHourReceipt(reader));
+            }
+
+            return _hoursReceipts;
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"Error retrieving all hour receipts: {e.Message}");
+            throw;
+        }
     }
-
-    public List<HourReceipt> GetAll()
+    
+    private HourReceipt MapReaderToHourReceipt(MySqlDataReader reader)
     {
-        return _hoursReceipts;
-
+        
+        // Dit gebruikt de kolomnamen uit uw SQL query
+        return new HourReceipt(
+            reader.GetInt32("Id"),
+            reader.GetInt32("UserId"),
+            reader.GetInt32("ProjectId"),
+            reader.GetString("Status"),
+            reader.GetInt32("HoursWorked"),
+            reader.GetInt32("MinutesWorked"),
+            reader.GetString("remark"),
+            reader.GetDateTime("Date")
+        );
     }
 }

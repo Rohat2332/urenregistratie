@@ -13,8 +13,9 @@ public class HourReceiptService : IHourReceiptService
         _hourReceiptRepository = hourReceiptRepository;
     }
 
-    public List <HourReceipt> GetAll()
+
+    public async Task<List<HourReceipt>> GetAll()
     {
-        return _hourReceiptRepository.GetAll();
+        return await _hourReceiptRepository.GetAll();
     }
 }
