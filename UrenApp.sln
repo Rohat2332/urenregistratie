@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HourRegistration.Core", "Ho
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HourRegistration.Core.Data", "HourRegistration.Core.Data\HourRegistration.Core.Data.csproj", "{7E6C6146-076B-49E3-967D-2DB6A2750B6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HourRegistration.Test", "HourRegistration.Test\HourRegistration.Test.csproj", "{07028C84-33BA-4EE0-A04D-952253A6B888}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{7E6C6146-076B-49E3-967D-2DB6A2750B6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E6C6146-076B-49E3-967D-2DB6A2750B6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E6C6146-076B-49E3-967D-2DB6A2750B6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07028C84-33BA-4EE0-A04D-952253A6B888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07028C84-33BA-4EE0-A04D-952253A6B888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07028C84-33BA-4EE0-A04D-952253A6B888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07028C84-33BA-4EE0-A04D-952253A6B888}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
