@@ -1,22 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using BasisUrenregistratie.ViewModels.summaries;
 using UrenRegistratie.Core.Interfaces.Services;
 using UrenRegistratie.Core.Models;
 
 namespace BasisUrenregistratie.ViewModels;
-
-/// <summary>
-/// Represents a summary of a specific day within a weekly schedule.
-/// </summary>
-public class WeeklyDaySummary
-{
-    /// <summary>
-    /// Gets or sets the date for this specific day entry.
-    /// </summary>
-    public DateTime Date { get; set; }
-    public HourReceipt? HourReceipt { get; set; }
-    
-}
 
 /// <summary>
 /// ViewModel responsible for the Employee Overview.
@@ -91,13 +79,37 @@ public class EmployeeOverviewViewModel
 
         // --- DATA AGGREGATIE ---
         // Groepeer en aggregeer de uren in de geladen bonnen (HourReceipts)
+        var aggregatedHours = AggregateHours();
+
+        // 3. Populate the WeekOverview collection for every day of the week (7 days)
+        PopulateWeekOverview(aggregatedHours);
+        
+    }
+
+    /// <summary>
+    /// Aggregates the worked hours from the loaded receipts for the current week.
+    /// </summary>
+    /// <returns>A dictionary mapping each date to the total number of hours worked on that date.</returns>
+
+    private Dictionary<DateTime, double> AggregateHours()
+    {
+        // Groepeer en aggregeer de uren in de geladen bonnen (HourReceipts)
         var aggregatedHours = HourReceipts
             .Where(h => h.Date.Date >= StartOfTheWeek.Date && h.Date.Date <= EndOfTheWeek.Date)
             .GroupBy(h => h.Date.Date) // Groepeer op datum
             .ToDictionary(g => g.Key, 
                 // Sum de HoursWorked en MinutesWorked
                 g => g.Sum(h => h.HoursWorked + (h.MinutesWorked / 60.0)));
+        
+        return aggregatedHours;
+    }
 
+    /// <summary>
+    /// Populates the WeekOverview collection with a summary for each day of the current week.
+    /// </summary>
+    /// <param name="aggregatedHours">A dictionary containing dates and their corresponding total hours worked.</param>
+    private void PopulateWeekOverview(Dictionary<DateTime, double> aggregatedHours)
+    {
         // 3. Populate the WeekOverview collection for every day of the week (7 days)
         for (var i = 0; i < 7; i++)
         {
@@ -117,11 +129,12 @@ public class EmployeeOverviewViewModel
     }
 
     /// <summary>
-    /// Calculates the start of the week with given day.
+    /// Calculates the number of days since Monday for a given date,
+    /// considering the specified culture's week start settings.
     /// </summary>
-    /// <param name="day"> DateTime</param>
-    /// <param name="culture">CultureInfo</param>
-    /// <returns>int - Returns an int with the days since monday </returns>
+    /// <param name="day">The date for which the calculation is performed.</param>
+    /// <param name="culture">The culture whose first day of the week setting will be applied.</param>
+    /// <returns>The number of days since Monday as an integer.</returns>
     private static int CalculateStartOfTheWeek(DateTime day, CultureInfo culture)
     {
         var daysSinceMonday = (int)day.DayOfWeek - (int)culture.DateTimeFormat.FirstDayOfWeek;
