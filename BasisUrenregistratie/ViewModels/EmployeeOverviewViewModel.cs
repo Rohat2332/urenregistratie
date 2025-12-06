@@ -14,6 +14,7 @@ public class WeeklyDaySummary
     /// Gets or sets the date for this specific day entry.
     /// </summary>
     public DateTime Date { get; set; }
+    public HourReceipt? HourReceipt { get; set; }
     
 }
 
@@ -27,7 +28,7 @@ public class EmployeeOverviewViewModel
     private readonly IUserService _userService;
     private User? _user;
     private ObservableCollection<HourReceipt> HourReceipts { get; set; } = [];
-    public ObservableCollection<WeeklyDaySummary> WeekOverview { get; set; } = [];
+    private ObservableCollection<WeeklyDaySummary> WeekOverview { get; set; } = [];
     private DateTime StartOfTheWeek { get; set; }
     public DateTime EndOfTheWeek { get; private set; }
     
@@ -70,14 +71,57 @@ public class EmployeeOverviewViewModel
         var culture = new CultureInfo("nl-NL");
 
         // 1. Calculate the start of the current week (Monday)
-        DateTime today = DateTime.Today;
-        int daysSinceMonday = (int)today.DayOfWeek - (int)culture.DateTimeFormat.FirstDayOfWeek;
+        var today = DateTime.Today;
 
-        // Handle the Sunday edge case:
-        // In the DayOfWeek enum, Sunday is 0 and Monday is 1.
-        // If today is Sunday (0) and the week starts on Monday (1), the math above yields -1.
-        // However, physically, Sunday is 6 days after the previous Monday.
-        if (today.DayOfWeek == DayOfWeek.Sunday && culture.DateTimeFormat.FirstDayOfWeek == DayOfWeek.Monday)
+        var daysSinceMonday = CalculateStartOfTheWeek(today, culture);
+
+        // Set the start (Monday) and end (Sunday) of the week
+        StartOfTheWeek = today.AddDays(-daysSinceMonday);
+        EndOfTheWeek = StartOfTheWeek.AddDays(6);
+
+        // 3. Populate the WeekOverview collection for every day of the week (7 days)
+        for (var i = 0; i < 7; i++)
+        {
+            var currentDay = StartOfTheWeek.AddDays(i);
+
+            foreach (var hourReceipt in HourReceipts)
+            {
+                if (hourReceipt.Date == currentDay.Date)
+                {
+                    WeekOverview.Add(new WeeklyDaySummary
+                    {
+                        Date = currentDay,
+                        HourReceipt = hourReceipt
+                    });
+                }
+                else
+                {
+                    WeekOverview.Add(new WeeklyDaySummary
+                    {
+                        Date = currentDay
+                    });
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calculates the start of the week with given day.
+    /// </summary>
+    /// <param name="day"> DateTime</param>
+    /// <param name="culture">CultureInfo</param>
+    /// <returns>int - Returns an int with the days since monday </returns>
+    private static int CalculateStartOfTheWeek(DateTime day, CultureInfo culture)
+    {
+        var daysSinceMonday = (int)day.DayOfWeek - (int)culture.DateTimeFormat.FirstDayOfWeek;
+
+        /*
+         Handle the Sunday edge case:
+        In the DayOfWeek enum, Sunday is 0 and Monday is 1.
+        If today is Sunday (0) and the week starts on Monday (1), the math above yields -1.
+        However, physically, Sunday is 6 days after the previous Monday.
+        */
+        if (day.DayOfWeek == DayOfWeek.Sunday && culture.DateTimeFormat.FirstDayOfWeek == DayOfWeek.Monday)
         {
             daysSinceMonday = 6;
         }
@@ -87,20 +131,6 @@ public class EmployeeOverviewViewModel
             daysSinceMonday += 7;
         }
 
-        // Set the start (Monday) and end (Sunday) of the week
-        StartOfTheWeek = today.AddDays(-daysSinceMonday);
-        EndOfTheWeek = StartOfTheWeek.AddDays(6);
-
-        // 3. Populate the WeekOverview collection for every day of the week (7 days)
-        for (int i = 0; i < 7; i++)
-        {
-            DateTime currentDay = StartOfTheWeek.AddDays(i);
-
-            WeekOverview.Add(new WeeklyDaySummary
-            {
-                Date = currentDay,
-                
-            });
-        }
+        return daysSinceMonday;
     }
 }
