@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using HourRegistartion.Core.Data.Repositories;
+using HourRegistration.Core.Data;
+using HourRegistration.Core.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UrenRegistratie.Core.Interfaces.Repositories;
@@ -26,6 +28,8 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
         // --- Dependency Injection Configuration ---
+        // Database
+        builder.Services.AddSingleton<DatabaseConnection>();
         
         //Repositories (Data Access)
         builder.Services.AddSingleton<IHourReceiptRepository, HourReceiptsRepository>();

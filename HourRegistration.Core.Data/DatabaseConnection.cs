@@ -1,12 +1,12 @@
 ﻿using MySqlConnector;
 using UrenRegistratie.Core.Interfaces.Services;
 
-namespace HourRegistartion.Core.Data;
+namespace HourRegistration.Core.Data;
 
 public class DatabaseConnection
 {
     private readonly IConfigurationService _configurationService;
-    private readonly string _connectionStringName = "HourRegistartion";
+    private const string ConnectionStringName = "HourRegistration";
 
     public DatabaseConnection(IConfigurationService configurationService)
     {
@@ -15,11 +15,11 @@ public class DatabaseConnection
 
     public async Task<MySqlConnection> GetOpenConnectionAsync()
     {
-        string connectionString = _configurationService.GetSetting(_connectionStringName);
+        string connectionString = _configurationService.GetSetting(ConnectionStringName);
 
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new InvalidOperationException($"Connection string '{_connectionStringName}' not found in configuration.");
+            throw new InvalidOperationException($"Connection string '{ConnectionStringName}' not found in configuration.");
         }
 
         try

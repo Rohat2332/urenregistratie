@@ -15,7 +15,7 @@ public class ConfigurationService : IConfigurationService
     
     public string GetSetting(string key, string defaultValue = "")
     {
-        return _configuration[key] ?? defaultValue;
+        return _configuration.GetConnectionString(key) ?? defaultValue;
     }
 
     public bool GetBoolSetting(string key, bool defaultValue = false)
