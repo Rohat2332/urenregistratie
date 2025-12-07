@@ -20,7 +20,7 @@ public class HourReceiptsRepository : IHourReceiptRepository
     {
         _hoursReceipts = new List<HourReceipt>();
         
-        const string query = "SELECT * FROM hour_receipts WHERE UserId = @UserId";
+        const string query = "SELECT * FROM hour_receipts WHERE id = @UserId";
 
         try
         {
