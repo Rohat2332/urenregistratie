@@ -1,6 +1,6 @@
-﻿using UrenRegistratie.Core.Models;
+﻿using HourRegistration.Core.Models;
 
-namespace UrenRegistratie.Core.Interfaces.Services;
+namespace HourRegistration.Core.Interfaces.Services;
 
 public interface IUserService
 {

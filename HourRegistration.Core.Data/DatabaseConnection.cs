@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using HourRegistration.Core.Interfaces.Services;
+using MySqlConnector;
 using UrenRegistratie.Core.Interfaces.Services;
 
 namespace HourRegistration.Core.Data;

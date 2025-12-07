@@ -1,12 +1,12 @@
 ﻿using CommunityToolkit.Maui;
-using HourRegistartion.Core.Data.Repositories;
 using HourRegistration.Core.Data;
 using HourRegistration.Core.Data.Repositories;
+using HourRegistration.Core.Interfaces.Repositories;
+using HourRegistration.Core.Interfaces.Services;
+using HourRegistration.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using UrenRegistratie.Core.Interfaces.Repositories;
 using UrenRegistratie.Core.Interfaces.Services;
-using UrenRegistratie.Core.Services;
 
 namespace BasisUrenregistratie;
 

@@ -1,4 +1,4 @@
-﻿namespace UrenRegistratie.Core.Models;
+﻿namespace HourRegistration.Core.Models;
 
 public class User
 {

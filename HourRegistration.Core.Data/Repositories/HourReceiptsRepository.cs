@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
+using HourRegistration.Core.Interfaces.Repositories;
+using HourRegistration.Core.Models;
 using MySqlConnector;
-using UrenRegistratie.Core.Interfaces.Repositories;
-using UrenRegistratie.Core.Models;
 
 namespace HourRegistration.Core.Data.Repositories;
 

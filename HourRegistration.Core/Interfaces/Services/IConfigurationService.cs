@@ -1,4 +1,4 @@
-﻿namespace UrenRegistratie.Core.Interfaces.Services;
+﻿namespace HourRegistration.Core.Interfaces.Services;
 
 public interface IConfigurationService
 {

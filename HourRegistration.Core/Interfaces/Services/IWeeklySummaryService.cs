@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using UrenRegistratie.Core.Models;
+using HourRegistration.Core.Models;
 
 namespace UrenRegistratie.Core.Interfaces.Services;
 

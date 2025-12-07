@@ -1,7 +1,7 @@
-﻿using UrenRegistratie.Core.Interfaces.Repositories;
-using UrenRegistratie.Core.Models;
+﻿using HourRegistration.Core.Interfaces.Repositories;
+using HourRegistration.Core.Models;
 
-namespace HourRegistartion.Core.Data.Repositories;
+namespace HourRegistration.Core.Data.Repositories;
 
 public class UserRepository  : IUserRepository
 {

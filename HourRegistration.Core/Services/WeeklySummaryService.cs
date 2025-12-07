@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
+using HourRegistration.Core.Models;
 using UrenRegistratie.Core.Interfaces.Services;
-using UrenRegistratie.Core.Models;
 
-namespace UrenRegistratie.Core.Services;
+namespace HourRegistration.Core.Services;
 
 /// <summary>
 /// Provides services for generating and aggregating weekly summaries based on provided hour receipts.

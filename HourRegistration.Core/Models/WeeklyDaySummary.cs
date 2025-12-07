@@ -1,4 +1,4 @@
-﻿namespace UrenRegistratie.Core.Models;
+﻿namespace HourRegistration.Core.Models;
 
 /// <summary>
 /// Represents a summary of a specific day within a weekly schedule.

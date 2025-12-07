@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using HourRegistration.Core.Interfaces.Services;
+using Microsoft.Extensions.Configuration;
 using UrenRegistratie.Core.Interfaces.Services;
 
-namespace UrenRegistratie.Core.Services;
+namespace HourRegistration.Core.Services;
 
 public class ConfigurationService : IConfigurationService
 {

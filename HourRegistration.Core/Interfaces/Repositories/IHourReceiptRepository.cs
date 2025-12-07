@@ -1,6 +1,6 @@
-﻿using UrenRegistratie.Core.Models;
+﻿using HourRegistration.Core.Models;
 
-namespace UrenRegistratie.Core.Interfaces.Repositories;
+namespace HourRegistration.Core.Interfaces.Repositories;
 
 public interface IHourReceiptRepository
 {

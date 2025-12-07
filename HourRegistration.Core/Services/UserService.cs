@@ -1,8 +1,9 @@
-﻿using UrenRegistratie.Core.Interfaces.Repositories;
+﻿using HourRegistration.Core.Interfaces.Repositories;
+using HourRegistration.Core.Interfaces.Services;
+using HourRegistration.Core.Models;
 using UrenRegistratie.Core.Interfaces.Services;
-using UrenRegistratie.Core.Models;
 
-namespace UrenRegistratie.Core.Services;
+namespace HourRegistration.Core.Services;
 
 public class UserService : IUserService
 {

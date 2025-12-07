@@ -1,7 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using HourRegistration.Core.Interfaces.Services;
+using HourRegistration.Core.Models;
 using UrenRegistratie.Core.Interfaces.Services;
-using UrenRegistratie.Core.Models;
 
 namespace BasisUrenregistratie.ViewModels;
 
