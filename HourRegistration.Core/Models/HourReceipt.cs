@@ -11,6 +11,11 @@ public class HourReceipt
     public string? Remark { get; set; }
     public DateTime Date {get; set;}
 
+    public HourReceipt()
+    {
+        
+    }
+
     public HourReceipt(int id, int userId, int projectId, string status, int hoursWorked, int minutesWorked,string remark, DateTime date)
     {
         Id = id;
