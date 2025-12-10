@@ -1,0 +1,43 @@
+## Ignore build output
+/bin/
+/obj/
+
+## Ignore user-specific files
+.idea/
+/.vs/
+/.vscode/
+/packages/
+
+## Ignore temporary files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+.DS_Store
+
+## Ignore debug and release files
+*.log
+*.pdb
+*.app
+*.apk
+*.ipa
+*.dSYM/
+
+## Ignore .NET files
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Ignore NuGet packages
+*.nupkg
+
+## Ignore MAUI specific files
+maui-generated/
+
+## Ignore Xamarin related files (if applicable)
+xamarin/
+
+## Ignore Android & iOS platform-specific files
+/Resources/Resources.pri
+/Resources/splashScreen.png
+/Resources/Drawable/
