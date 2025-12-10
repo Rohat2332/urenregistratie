@@ -4,7 +4,7 @@ public class HourReceipt
 {
     public int Id { get; set; }
     public int UserId { get; set; }
-    public int ProjectId { get; set; }
+    public int? ProjectId { get; set; }
     public string? Status { get; set; }
     public int HoursWorked { get; set; }
     public int MinutesWorked { get; set; }
@@ -16,7 +16,7 @@ public class HourReceipt
         
     }
 
-    public HourReceipt(int id, int userId, int projectId, string status, int hoursWorked, int minutesWorked,string remark, DateTime date)
+    public HourReceipt(int id, int userId, int? projectId, string status, int hoursWorked, int minutesWorked,string? remark, DateTime date)
     {
         Id = id;
         UserId = userId;

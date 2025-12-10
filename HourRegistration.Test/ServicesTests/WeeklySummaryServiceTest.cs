@@ -89,15 +89,16 @@ public class WeeklySummaryServiceTest
     }
 
 
-    /// Tests the `AggregateHours` method of the `WeeklySummaryService` class to verify its ability to correctly sum the hours
-    /// worked and filter them based on a specific date range.
-    /// This test constructs a set of sample `HourReceipt` data for a given week, including entries that fall both inside and
-    /// outside the specified range. It then validates whether `AggregateHours` produces the expected results for hours summed
-    /// per date and ensures that data outside the range is ignored. Additionally, the test generates a detailed output table
-    /// to display and compare the actual results versus expectations.
-    /// Asserts include checks on the number of entries in the result, the correctness of hours for valid dates, and the absence
-    /// of invalid dates.
-    /// Exceptions, formatting, and result mismatches are explicitly captured via table logging in the output for better diagnostics.
+    /// Tests the method responsible for aggregating worked hours by summing them and filtering the data
+    /// based on the provided date range. This test ensures that the aggregation correctly sums worked hours
+    /// within the specified date range and filters out any entries outside that range.
+    /// It also verifies that the resulting data links correctly to the corresponding HourReceipt ID and
+    /// that all calculated total hours meet the expected values within a defined tolerance.
+    /// The method further validates that such aggregation has the correct number of keys in the result set.
+    /// <remarks>
+    /// The test considers edge cases where the entries lie on the boundary of the date range
+    /// and ensures that only valid entries are included in the results.
+    /// </remarks>
     [Fact]
     public void AggregateHours_ShouldCorrectlySumHoursAndFilterByDateRange()
     {
@@ -113,62 +114,65 @@ public class WeeklySummaryServiceTest
 
         var hourReceipts = new List<HourReceipt>
         {
-            // ... (hourReceipts data blijft hetzelfde) ...
-            // Binnen bereik (maandag) → 7.5 uur
-            new() { Date = startOfWeek.AddDays(0), HoursWorked = 4, MinutesWorked = 30 },
-            new() { Date = startOfWeek.AddDays(0), HoursWorked = 3, MinutesWorked = 0 },
+            // Binnen bereik (maandag) → 7.5 uur. ID 10 en 11.
+            // De service pakt .First().Id, dus we verwachten ID 10.
+            new() { Id = 10, Date = startOfWeek.AddDays(0), HoursWorked = 4, MinutesWorked = 30 },
+            new() { Id = 11, Date = startOfWeek.AddDays(0), HoursWorked = 3, MinutesWorked = 0 },
 
-            // Binnen bereik (woensdag) → 8.0 uur
-            new() { Date = startOfWeek.AddDays(2), HoursWorked = 7, MinutesWorked = 45 },
-            new() { Date = startOfWeek.AddDays(2), HoursWorked = 0, MinutesWorked = 15 },
+            // Binnen bereik (woensdag) → 8.0 uur. ID 20 en 21. Verwacht ID 20.
+            new() { Id = 20, Date = startOfWeek.AddDays(2), HoursWorked = 7, MinutesWorked = 45 },
+            new() { Id = 21, Date = startOfWeek.AddDays(2), HoursWorked = 0, MinutesWorked = 15 },
 
             // Buiten bereik (genegeerd)
-            new() { Date = startOfWeek.AddDays(-1), HoursWorked = 2, MinutesWorked = 0 },
-            new() { Date = endOfWeek.AddDays(1), HoursWorked = 1, MinutesWorked = 0 },
+            new() { Id = 99, Date = startOfWeek.AddDays(-1), HoursWorked = 2, MinutesWorked = 0 },
+            new() { Id = 100, Date = endOfWeek.AddDays(1), HoursWorked = 1, MinutesWorked = 0 },
         };
 
         // Act
+        // Result is nu: Dictionary<DateTime, (double TotalHours, int ReceiptId)>
         var result = _service.AggregateHours(hourReceipts, startOfWeek, endOfWeek);
 
         // Output Tabel
-        var expectedHours = new Dictionary<DateTime, double>
+        var expectedData = new Dictionary<DateTime, (double Hours, int Id)>
         {
-            { startOfWeek, 7.5 }, // Maandag
-            { startOfWeek.AddDays(2), 8.0 } // Woensdag
+            { startOfWeek, (7.5, 10) }, // Maandag
+            { startOfWeek.AddDays(2), (8.0, 20) } // Woensdag
         };
 
         var table = new Table()
             .Border(TableBorder.Rounded)
-            .Title($"[yellow]Aggregatie Resultaten: {startOfWeek:d} t/m {endOfWeek:d} (Tolerantie: {tolerance})[/]")
+            .Title($"[yellow]Aggregatie Resultaten: {startOfWeek:d} t/m {endOfWeek:d}[/]")
             .AddColumn(new TableColumn("[green]Datum[/]"))
-            .AddColumn(new TableColumn("[green]Gevonden Uren[/]").Centered())
-            .AddColumn(new TableColumn("[green]Verwachting[/]").Centered())
+            .AddColumn(new TableColumn("[green]Gevonden (Uur | ID)[/]").Centered())
+            .AddColumn(new TableColumn("[green]Verwacht (Uur | ID)[/]").Centered())
             .AddColumn(new TableColumn("[green]Status[/]").Centered());
 
-        // Loop over de Verwachtingen om alle dagen te controleren (ook ontbrekende)
-        foreach (var expected in expectedHours)
+        foreach (var expected in expectedData)
         {
-            result.TryGetValue(expected.Key, out double actualHours);
+            // 2. Tuple uitpakken
+            result.TryGetValue(expected.Key, out var actualData);
 
-            // 2. FIX: Gebruik Math.Abs om te controleren op gelijkheid binnen de tolerantie
-            var isCorrect = Math.Abs(actualHours - expected.Value) < tolerance;
+            // Vergelijk uren (met tolerantie) EN ID (exact)
+            var hoursCorrect = Math.Abs((actualData.TotalHours - expected.Value.Hours)!) < tolerance;
 
-            var status =
-                isCorrect ? "[lime]OK[/]" : "[red]FOUT[/]"; // Logische correctie: als het correct is, is het OK
+            // FIX: Gebruik 'ReceiptId' in plaats van 'HourReceiptId'
+            var idCorrect = actualData.HourReceiptId == expected.Value.Id;
+
+            var isCorrect = hoursCorrect && idCorrect;
+            var status = isCorrect ? "[lime]OK[/]" : "[red]FOUT[/]";
 
             table.AddRow(
                 expected.Key.ToString("ddd, d MMMM"),
-                $"{actualHours:N2}",
-                $"{expected.Value:N2}",
+                // FIX: Gebruik 'ReceiptId' ook hier
+                $"{actualData.TotalHours:N2}u | ID: {actualData.HourReceiptId}",
+                $"{expected.Value.Hours:N2}u | ID: {expected.Value.Id}",
                 status
             );
         }
 
-        // Controleer of er onverwachte data is
-        // Hier is de telling van Keys (integers) en niet floating point, dus directe vergelijking is prima.
-        if (result.Keys.Count > expectedHours.Keys.Count)
+        if (result.Keys.Count > expectedData.Keys.Count)
         {
-            table.AddRow("[red]Onverwachte data[/]", $"[{result.Keys.Count}]", $"[{expectedHours.Keys.Count}]",
+            table.AddRow("[red]Onverwachte data[/]", $"[{result.Keys.Count}]", $"[{expectedData.Keys.Count}]",
                 "[red]FOUT[/]");
         }
 
@@ -177,24 +181,30 @@ public class WeeklySummaryServiceTest
         // Assert
         result.Keys.Should().HaveCount(2);
 
-        // 3. TOLERANTIE IS CORRECT GEBRUIKT IN ASSERTS
-        result[startOfWeek].Should().BeApproximately(7.5, tolerance);
-        result[startOfWeek.AddDays(2)].Should().BeApproximately(8.0, tolerance);
+        // 3. AANGEPASTE ASSERTS MET JUISTE NAAMGEVING
+
+        // Check Maandag
+        result[startOfWeek].TotalHours.Should().BeApproximately(7.5, tolerance);
+        result[startOfWeek].HourReceiptId.Should().Be(10); // FIX: ReceiptId
+
+        // Check Woensdag
+        result[startOfWeek.AddDays(2)].TotalHours.Should().BeApproximately(8.0, tolerance);
+        result[startOfWeek.AddDays(2)].HourReceiptId.Should().Be(20); // FIX: ReceiptId
+
+        // Check Buiten bereik
         result.Should().NotContainKey(startOfWeek.AddDays(-1));
 
         _output.WriteLine("--- Test Succesvol ---");
     }
 
-    /// Validates that the GenerateWeekOverview method returns a list of 7 days starting from a given start date.
-    /// For any days within the week that are not explicitly specified in the input-aggregated hours dictionary,
-    /// the method should assign a value of zero hours.
-    /// This test ensures:
-    /// - Correct generation of a 7-day week starting from the provided start date.
-    /// - Accurate handling of missing data by setting TotalHours to zero for those days.
-    /// - Proper inclusion of days with specified aggregated hours in the result.
-    /// The method uses a predefined tolerance for numerical comparisons to verify floating-point accuracy
-    /// and includes detailed validation for all 7 days using FluentAssertions to check the expected data structure
-    /// and values.
+    /// Validates the functionality of generating a weekly overview that spans exactly seven consecutive days,
+    /// beginning from the specified start date. This test ensures that the generated overview includes all days,
+    /// assigning zero hours to any days not explicitly present in the input data.
+    /// <remarks>
+    /// The input consists of a starting date and a dictionary mapping specific dates to their corresponding
+    /// total hours and receipt IDs. The test checks that the result covers the full week, aligning with the
+    /// expected format and data for days with and without an input.
+    /// </remarks>
     [Fact]
     public void GenerateWeekOverview_ShouldReturn7DaysStartingFromStartDate_WithZeroHoursForMissingDays()
     {
@@ -204,22 +214,19 @@ public class WeeklySummaryServiceTest
         // Definieer de tolerantie HIER, zodat deze globaal is binnen deze methode.
         const double tolerance = 0.001;
 
-        // Zorg ervoor dat System. Math is geimporteerd (via using System;)
-        // Als je de Fluent Assertions. BeApproximately methode gebruikt, is Math. Abs niet strikt nodig,
-        // maar het is goed om de tolerantie consistent te gebruiken voor zowel de tabel status als de asserts.
-
-        // Geaggregeerde uren: alleen maandag (7.5) en woensdag (8.0) hebben data
-        var aggregatedHours = new Dictionary<DateTime, double>
+        // FIX 1: De Dictionary moet nu Tuples bevatten (Uren, Id)
+        // We verzinnen hier even dummy ID's (bijv. 10 en 20), omdat die nodig zijn voor de input.
+        var aggregatedData = new Dictionary<DateTime, (double TotalHours, int ReceiptId)>
         {
-            { startOfWeek.AddDays(0), 7.5 }, // Maandag
-            { startOfWeek.AddDays(2), 8.0 } // Woensdag
+            { startOfWeek.AddDays(0), (7.5, 10) }, // Maandag (7.5 uur, ID 10)
+            { startOfWeek.AddDays(2), (8.0, 20) } // Woensdag (8.0 uur, ID 20)
         };
 
         _output.WriteLine(
             $"\n--- Test gestart: {nameof(GenerateWeekOverview_ShouldReturn7DaysStartingFromStartDate_WithZeroHoursForMissingDays)} ---");
 
         // Act
-        var result = _service.GenerateWeekOverview(aggregatedHours, startOfWeek);
+        var result = _service.GenerateWeekOverview(aggregatedData, startOfWeek);
 
         // Output Tabel
         var table = new Table()
@@ -235,8 +242,11 @@ public class WeeklySummaryServiceTest
             var currentDay = startOfWeek.AddDays(i);
             var actualHours = result[i].TotalHours;
 
-            // Verwachting: 7.5 op maandag, 8.0 op woensdag, anders 0.0
-            var expectedHours = aggregatedHours.GetValueOrDefault(currentDay.Date);
+            // FIX 2: Data ophalen uit de Tuple Dictionary
+            // GetValueOrDefault geeft (0, 0) terug als de datum niet bestaat.
+            // Item1 (of TotalHours) is dus 0.0 als er geen data is, wat klopt voor deze test.
+            var expectedData = aggregatedData.GetValueOrDefault(currentDay.Date);
+            var expectedHours = expectedData.TotalHours;
 
             // Gebruik de Math.Abs functie in de lus om de status te bepalen.
             var isCorrect = Math.Abs(actualHours - expectedHours) < tolerance;
@@ -253,14 +263,13 @@ public class WeeklySummaryServiceTest
 
         WriteSpectreOutput(table);
 
+        // Assert
         result.Should().HaveCount(7);
         result[0].Date.Should().Be(startOfWeek);
 
-        // Assert
-        result.Should().HaveCount(7);
         result.Should().ContainSingle(s =>
             s.Date == startOfWeek.AddDays(0) &&
-            Math.Abs(s.TotalHours - 7.5) < tolerance);
+            Math.Abs(s.TotalHours - 7.5) < tolerance); // ID check optioneel hier
 
         result.Should().ContainSingle(s =>
             s.Date == startOfWeek.AddDays(2) &&

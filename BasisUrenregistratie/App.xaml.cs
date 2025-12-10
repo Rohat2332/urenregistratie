@@ -5,10 +5,10 @@ namespace BasisUrenregistratie;
 
 public partial class App : Application
 {
-    public App(EmployeeOverviewViewModel viewModel)
+    public App()
     {
         InitializeComponent();
 
-        MainPage = new EmployeeOverview(viewModel);
+        MainPage = new AppShell();
     }
 }

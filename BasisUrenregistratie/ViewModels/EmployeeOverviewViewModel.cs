@@ -1,5 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using BasisUrenregistratie.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using HourRegistration.Core.Interfaces.Services;
 using HourRegistration.Core.Models;
 using UrenRegistratie.Core.Interfaces.Services;
@@ -10,7 +13,7 @@ namespace BasisUrenregistratie.ViewModels;
 /// ViewModel managing the employee overview and its presentation logic.
 /// Handles user data retrieval, weekly calculations, and binds to the UI.
 /// </summary>
-public class EmployeeOverviewViewModel
+public partial class EmployeeOverviewViewModel : ObservableObject
 {
     private readonly IHourReceiptService _hourReceiptService;
     private readonly IUserService _userService;
@@ -30,12 +33,28 @@ public class EmployeeOverviewViewModel
         _userService = userService;
         _weeklySummaryService = weeklySummaryService;
         SetUser();
+        // Roep de async methode aan, de berekening gebeurt daar nu NA het laden
         if (_user != null)
         {
-            _ = LoadUserHourReceipts(_user.Id);
+            InitializeData(_user.Id);
         }
-        CalculateCurrentWeek(_selectedDate, _cultureInfo);
     }
+    private async void InitializeData(int userId)
+    {
+        try
+        {
+            // Wacht tot de data er is
+            await LoadUserHourReceipts(userId);
+    
+            // Nu pas berekenen, want nu is HourReceipts gevuld
+            CalculateCurrentWeek(_selectedDate, _cultureInfo);
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
+    }
+    
 
     /// <summary>
     /// Asynchronously loads all hour receipts for a specific user and updates the current collection.
@@ -68,7 +87,7 @@ public class EmployeeOverviewViewModel
     /// </summary>
     private void SetUser()
     {
-        _user = _userService.GetById(0);
+        _user = new User(0, "user1", "password123");
     }
 
     /// <summary>
@@ -86,14 +105,34 @@ public class EmployeeOverviewViewModel
         EndOfTheWeek = StartOfTheWeek.AddDays(6);
         
         // Groepeer en aggregeer de uren in de geladen bonnen (HourReceipts)
-        var aggregatedHours = _weeklySummaryService.AggregateHours(HourReceipts.ToList(), StartOfTheWeek, EndOfTheWeek);
+        var aggregatedData = _weeklySummaryService.AggregateHours(HourReceipts.ToList(), StartOfTheWeek, EndOfTheWeek);
 
         // 3. Populate the WeekOverview collection for every day of the week (7 days)
-        var summaries = _weeklySummaryService.GenerateWeekOverview(aggregatedHours, StartOfTheWeek);
+        var summaries = _weeklySummaryService.GenerateWeekOverview(aggregatedData, StartOfTheWeek);
 
         foreach (var summary in summaries)
         {
             WeekOverview.Add(summary);
         }
+    }
+
+    [RelayCommand]
+    private async Task NavigateToFormPage(WeeklyDaySummary? summary)
+    {
+        if (summary == null) return;
+        if (_user != null)
+        {
+            var hourReceipt = new HourReceipt()
+            {
+                UserId = _user.Id,
+                Date = summary.Date,
+                Status = "Concept"
+            };
+
+            // await _hourReceiptService.Add(hourReceipt);
+        }
+
+
+        await Shell.Current.GoToAsync(nameof(TestView));
     }
 }

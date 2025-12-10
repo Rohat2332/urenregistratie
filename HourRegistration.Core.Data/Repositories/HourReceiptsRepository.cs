@@ -8,17 +8,21 @@ namespace HourRegistration.Core.Data.Repositories;
 public class HourReceiptsRepository : IHourReceiptRepository
 {
     private readonly DatabaseConnection _databaseConnection;
-    private  List<HourReceipt> _hoursReceipts;
 
     public HourReceiptsRepository(DatabaseConnection databaseConnection)
     {
         _databaseConnection =  databaseConnection;
-        _hoursReceipts = [];
     }
 
+    /// <summary>
+    /// Retrieves all hour receipts associated with a specific user by their identifier.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user whose hour receipts are to be retrieved.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="HourReceipt"/> objects.</returns>
+    /// <exception cref="Exception">Thrown when an error occurs during the retrieval of hour receipts.</exception>
     public async Task<List<HourReceipt>> GetAllByUserId(int userId)
     {
-        _hoursReceipts = new List<HourReceipt>();
+        var hoursReceipts = new List<HourReceipt>();
         
         const string query = "SELECT * FROM hour_receipts WHERE id = @UserId";
 
@@ -31,12 +35,12 @@ public class HourReceiptsRepository : IHourReceiptRepository
             
             await using var reader = await command.ExecuteReaderAsync();
 
-            if (await reader.ReadAsync())
+            while (await reader.ReadAsync())
             {
-                _hoursReceipts.Add(MapReaderToHourReceipt(reader));
+                hoursReceipts.Add(MapReaderToHourReceipt(reader));
             }
 
-            return _hoursReceipts;
+            return hoursReceipts;
         }
         catch (Exception e)
         {
@@ -45,9 +49,14 @@ public class HourReceiptsRepository : IHourReceiptRepository
         }
     }
 
+    /// <summary>
+    /// Retrieves all hour receipts from the database.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="HourReceipt"/> objects.</returns>
+    /// <exception cref="Exception">Thrown when an error occurs while fetching hour receipts from the database.</exception>
     public async Task<List<HourReceipt>> GetAll()
     {
-        _hoursReceipts = new List<HourReceipt>();
+        var hoursReceipts = new List<HourReceipt>();
         
         const string query = "SELECT * FROM hour_receipts;";
 
@@ -57,13 +66,16 @@ public class HourReceiptsRepository : IHourReceiptRepository
             await using var command = new MySqlCommand(query, connection);
             
             await using var reader = await command.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync())
+            
+            var hasRows = reader.HasRows; 
+            Debug.WriteLine($"DB Antwoord: Heeft rijen = {hasRows}"); // Voeg dit toe
+            
+            while (await reader.ReadAsync())
             {
-                _hoursReceipts.Add(MapReaderToHourReceipt(reader));
+                hoursReceipts.Add(MapReaderToHourReceipt(reader));
             }
 
-            return _hoursReceipts;
+            return hoursReceipts;
         }
         catch (Exception e)
         {
@@ -71,19 +83,73 @@ public class HourReceiptsRepository : IHourReceiptRepository
             throw;
         }
     }
-    
-    private HourReceipt MapReaderToHourReceipt(MySqlDataReader reader)
+
+    /// <summary>
+    /// Adds a new hour receipt to the database.
+    /// </summary>
+    /// <param name="hourReceipt">The hour receipt object containing information like user ID, project ID, status,
+    /// hours worked, minutes worked, remark, and date to be inserted.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="Exception">Thrown when an error occurs while adding the hour receipt to the database.</exception>
+    public async Task Add(HourReceipt hourReceipt)
     {
-        
-        // Dit gebruikt de kolomnamen uit uw SQL query
+        const string query =
+            "INSERT INTO hour_receipts (user_id, status, date, hours_worked, minutes_worked) VALUES (@UserId, @Status, @Date,@hours_worked, @minutes_worked)";
+
+        try
+        {
+            await using var connection = await _databaseConnection.GetOpenConnectionAsync();
+            await using var command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@UserId", hourReceipt.UserId);
+            command.Parameters.AddWithValue("@Status", hourReceipt.Status);
+            command.Parameters.AddWithValue("@Date", hourReceipt.Date);
+            command.Parameters.AddWithValue("@hours_worked", hourReceipt.HoursWorked);
+            command.Parameters.AddWithValue("@minutes_worked", hourReceipt.MinutesWorked);
+
+            var reader = await command.ExecuteNonQueryAsync();
+
+            if (reader == 0)
+            {
+                throw new Exception("Error inserting hour receipt");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Maps a data reader to an HourReceipt object by extracting and converting the appropriate columns.
+    /// </summary>
+    /// <param name="reader">The MySqlDataReader containing the result set from the database query.</param>
+    /// <returns>An HourReceipt object created from the data in the reader.</returns>
+    private static HourReceipt MapReaderToHourReceipt(MySqlDataReader reader)
+    {
+        // Hulpfunctie om een nullable int veilig te lezen
+        int? GetNullableInt(string columnName)
+        {
+            int ordinal = reader.GetOrdinal(columnName);
+            return reader.IsDBNull(ordinal) ? null : reader.GetInt32(ordinal);
+        }
+    
+        // Hulpfunctie om een nullable string veilig te lezen
+        string? GetNullableString(string columnName)
+        {
+            var ordinal = reader.GetOrdinal(columnName);
+            return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+        }
+
         return new HourReceipt(
             reader.GetInt32("Id"),
-            reader.GetInt32("UserId"),
-            reader.GetInt32("ProjectId"),
-            reader.GetString("Status"),
-            reader.GetInt32("HoursWorked"),
-            reader.GetInt32("MinutesWorked"),
-            reader.GetString("remark"),
+            reader.GetInt32("user_id"), 
+            GetNullableInt("project_id"), 
+            reader.GetString("Status"), 
+            reader.GetInt32("hours_worked"), 
+            reader.GetInt32("minutes_worked"),
+            GetNullableString("remark"), 
             reader.GetDateTime("Date")
         );
     }
