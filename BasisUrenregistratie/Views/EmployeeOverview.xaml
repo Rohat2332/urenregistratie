@@ -2,7 +2,7 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             
+
              xmlns:viewModels="clr-namespace:BasisUrenregistratie.ViewModels"
              xmlns:coreModels="clr-namespace:HourRegistration.Core.Models;assembly=HourRegistration.Core"
 
@@ -27,12 +27,12 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="coreModels:WeeklyDaySummary">
                                 <!-- De rij voor elke dag (een Grid) -->
-                                <Grid ColumnDefinitions="3*,2*"
-                                      Padding="0,2">
+                                <Grid Padding="0,2">
 
                                     <!-- Day name, Day number and month name-->
-                                    <Border Stroke="black"
-                                            StrokeThickness="3"
+                                    <Border Margin="200,0"
+                                            Stroke="black"
+                                            StrokeThickness="2"
                                             BackgroundColor="white"
                                             Padding="10,10,10,10">
 
@@ -40,8 +40,9 @@
                                             <RoundRectangle CornerRadius="15" />
                                         </Border.StrokeShape>
 
-                                        <HorizontalStackLayout Spacing="10">
-                                            <Border Stroke="#0096FF"
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <Border Grid.Column="0"
+                                                    Stroke="#0096FF"
                                                     BackgroundColor="#0096FF"
                                                     Padding="10,10,10,10">
 
@@ -54,7 +55,20 @@
                                                        TextColor="White"
                                                        VerticalOptions="Center" />
                                             </Border>
-                                        </HorizontalStackLayout>
+
+                                            <Button Grid.Column="1"
+                                                    Text="uren bon aanmaken"
+                                                    TextColor="White"
+                                                    BackgroundColor="#32CD32"
+                                                    HorizontalOptions="End"
+                                                    IsVisible="{Binding IsDayEmpty}"
+
+                                                    Command="{Binding Source={
+                                                        RelativeSource AncestorType={
+                                                            x:Type viewModels:EmployeeOverviewViewModel}
+                                                            }, Path=NavigateToFormPageCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                        </Grid>
                                     </Border>
                                 </Grid>
                             </DataTemplate>

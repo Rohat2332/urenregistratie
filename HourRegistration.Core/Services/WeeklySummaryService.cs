@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using HourRegistration.Core.Interfaces.Services;
 using HourRegistration.Core.Models;
 using UrenRegistratie.Core.Interfaces.Services;
 
@@ -46,42 +47,61 @@ public class WeeklySummaryService : IWeeklySummaryService
     /// <param name="startOfTheWeek">The start date of the week for which to aggregate hours.</param>
     /// <param name="endOfTheWeek">The end date of the week for which to aggregate hours.</param>
     /// <returns>A dictionary mapping each date within the specified range to the total number of hours worked on that date.</returns>
-    public Dictionary<DateTime, double> AggregateHours(List<HourReceipt> hourReceipts, DateTime startOfTheWeek,
-        DateTime endOfTheWeek)
+    public Dictionary<DateTime, (double TotalHours, int HourReceiptId)> AggregateHours(
+        List<HourReceipt> hourReceipts,
+        DateTime startOfTheWeek,
+        DateTime endOfTheWeek
+        )
     {
         // Groepeer en aggregeer de uren in de geladen bonnen (HourReceipts)
-        var aggregatedHours = hourReceipts
+        var aggregatedData = hourReceipts
             .Where(h => h.Date.Date >= startOfTheWeek.Date && h.Date.Date <= endOfTheWeek.Date)
             .GroupBy(h => h.Date.Date) // Groepeer op datum
-            .ToDictionary(g => g.Key, 
-                // Sum de HoursWorked en MinutesWorked
-                g => g.Sum(h => h.HoursWorked + (h.MinutesWorked / 60.0)));
-        
-        return aggregatedHours;
+            .ToDictionary(
+                g => g.Key,
+                g => (
+                    TotalHours: g.Sum(h => h.HoursWorked + (h.MinutesWorked / 60.0)),
+                    HourReceiptId: g.First().Id
+                )
+            );
+
+        return aggregatedData;
     }
 
     /// <summary>
     /// Generates a weekly overview summarizing the hours for each day within the week,
     /// starting from the specified start date.
     /// </summary>
-    /// <param name="aggregatedHours">A dictionary containing the total hours worked for each date.</param>
+    /// <param name="aggregatedData">A dictionary where the key is the date and the value is a tuple containing total hours and the associated hour receipt ID for that date.</param>
     /// <param name="startOfTheWeek">The start date of the week for which the overview is being generated.</param>
     /// <returns>A list of <see cref="WeeklyDaySummary"/> objects, each representing a summary of hours for a specific day.</returns>
-    public List<WeeklyDaySummary> GenerateWeekOverview(Dictionary<DateTime, double> aggregatedHours, DateTime startOfTheWeek)
+    public List<WeeklyDaySummary> GenerateWeekOverview(
+        Dictionary<DateTime, (double TotalHours, int HourReceiptId)> aggregatedData, DateTime startOfTheWeek)
     {
         var summaries = new List<WeeklyDaySummary>();
-        
+
         for (var i = 0; i < 7; i++)
         {
             var currenDay = startOfTheWeek.AddDays(i);
-            
-            aggregatedHours.TryGetValue(currenDay.Date, out var totalHours);
-            
-            summaries.Add(new WeeklyDaySummary
+
+            if (aggregatedData.TryGetValue(currenDay.Date, out var data))
             {
-                Date = currenDay,
-                TotalHours = totalHours
-            });
+                summaries.Add(new WeeklyDaySummary
+                {
+                    Date = currenDay,
+                    TotalHours = data.TotalHours,
+                    Id = data.HourReceiptId
+                });
+            }
+            else
+            {
+                summaries.Add(new WeeklyDaySummary
+                {
+                    Date = currenDay,
+                    TotalHours = data.TotalHours,
+                    Id = null
+                });
+            }
         }
         return summaries;
     }

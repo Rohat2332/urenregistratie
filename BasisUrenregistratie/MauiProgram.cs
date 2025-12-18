@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui;
+﻿using System.Collections.Immutable;
+using CommunityToolkit.Maui;
 using HourRegistration.Core.Data;
 using HourRegistration.Core.Data.Repositories;
 using HourRegistration.Core.Interfaces.Repositories;
@@ -43,9 +44,15 @@ public static class MauiProgram
         
         // ViewModels (Data Presentation Logic)
         builder.Services.AddTransient<ViewModels.EmployeeOverviewViewModel>();
+        // builder.Services.AddTransient<ViewModels.FormPageViewModel>(); Uncomment this line to enable the FormPage
+        builder.Services.AddTransient<ViewModels.TestViewModel>();
+        
+        
         
         //Views (Pages)
         builder.Services.AddTransient<Views.EmployeeOverview>();
+        builder.Services.AddTransient<Views.TestView>();
+        //builder.Services.AddTransient<Views.FormPageView>();  Change FormPage to FormPageView to enable the FormPage
         
         //App settings
         builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);

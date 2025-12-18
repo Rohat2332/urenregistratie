@@ -5,6 +5,8 @@
 /// </summary>
 public class WeeklyDaySummary
 {
+    public int? Id;
     public DateTime Date { get; set; }
     public double TotalHours { get; set; }
+    public bool IsDayEmpty => Id is null or 0;
 }
