@@ -68,6 +68,27 @@
                                                             x:Type viewModels:EmployeeOverviewViewModel}
                                                             }, Path=NavigateToFormPageCommand}"
                                                     CommandParameter="{Binding .}" />
+                                            <Button Grid.Column="1"
+                                                    Text="uren bon bewerken"
+                                                    TextColor="White"
+                                                    BackgroundColor="#C5C5C5"
+                                                    BorderColor="#928C8C"
+                                                    HorizontalOptions="End"
+                                                    IsVisible="False" 
+                                                    Command="{Binding Source={
+                                                        RelativeSource AncestorType={
+                                                            x:Type viewModels:EmployeeOverviewViewModel}}, 
+                                                            Path=NavigateToFormPageCommand}"
+                                                    CommandParameter="{Binding .}">
+
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" 
+                                                                 Binding="{Binding IsDayEmpty}" 
+                                                                 Value="False">
+                                                        <Setter Property="IsVisible" Value="True" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                 </Grid>

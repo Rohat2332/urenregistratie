@@ -33,26 +33,52 @@ public partial class EmployeeOverviewViewModel : ObservableObject
         _userService = userService;
         _weeklySummaryService = weeklySummaryService;
         SetUser();
-        // Roep de async methode aan, de berekening gebeurt daar nu NA het laden
+        
         if (_user != null)
         {
             InitializeData(_user.Id);
         }
     }
+
+    /// <summary>
+    /// Initializes the data for the employee overview by loading the user hour receipts
+    /// and calculating the weekly summary for the current week based on the provided user ID.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user for whom data is to be initialized.</param>
     private async void InitializeData(int userId)
     {
         try
         {
-            // Wacht tot de data er is
             await LoadUserHourReceipts(userId);
-    
-            // Nu pas berekenen, want nu is HourReceipts gevuld
+            
             CalculateCurrentWeek(_selectedDate, _cultureInfo);
         }
-        catch (Exception e)
+        catch (InvalidOperationException ex)
         {
-            throw; // TODO handle exception
+            System.Diagnostics.Debug.WriteLine($"Operation error in InitializeData: {ex.Message}");
         }
+        catch (ArgumentException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Invalid argument in InitializeData: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Unexpected error in InitializeData: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously refreshes data in the employee overview, including loading user hour receipts
+    /// and calculating the weekly summary for the selected date.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation of refreshing data.</returns>
+    public async Task RefreshDataAsync()
+    {
+        if (_user == null) return;
+    
+        // Roep je bestaande laad-methoden aan
+        await LoadUserHourReceipts(_user.Id);
+        CalculateCurrentWeek(_selectedDate, _cultureInfo);
     }
     
 
@@ -116,23 +142,45 @@ public partial class EmployeeOverviewViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Navigates to the form page for the given weekly day summary. If the summary does not exist,
+    /// creates a new hour receipt entry and navigates to the form page associated with it.
+    /// </summary>
+    /// <param name="summary">The weekly day summary to be navigated to. If null, navigation is not performed.</param>
+    /// <returns>A task that represents the asynchronous navigation operation.</returns>
     [RelayCommand]
     private async Task NavigateToFormPage(WeeklyDaySummary? summary)
     {
         if (summary == null) return;
-        if (_user != null)
+
+        var targetId = 0;
+        
+        // Check if the summary is a new entry or an existing one
+        if (summary.Id.HasValue && summary.Id.Value > 0)
         {
-            var hourReceipt = new HourReceipt()
-            {
-                UserId = _user.Id,
-                Date = summary.Date,
-                Status = "Concept"
-            };
-
-            // await _hourReceiptService.Add(hourReceipt);
+            targetId = summary.Id.Value;
         }
-
-
-        await Shell.Current.GoToAsync(nameof(TestView));
+        else
+        {
+            // Create a new entry
+            if (_user != null)
+            {
+                var hourReceipt = new HourReceipt()
+                {
+                    UserId = _user.Id,
+                    Date = summary.Date,
+                    Status = "Concept"
+                };
+            
+                await _hourReceiptService.Add(hourReceipt);
+                
+                var allUserHourReceipts = await _hourReceiptService.GetAll();
+                targetId = allUserHourReceipts.Where(x => x.UserId == _user.Id && x.Date.Date == summary.Date.Date)
+                    .OrderByDescending(x => x.Id)
+                    .First().Id;
+            }
+        }
+        //Todo: Change to form page
+        await Shell.Current.GoToAsync($"{nameof(TestView)}?ReceiptId={targetId}");
     }
 }
