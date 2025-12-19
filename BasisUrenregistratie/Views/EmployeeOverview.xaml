@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+
+             xmlns:viewModels="clr-namespace:BasisUrenregistratie.ViewModels"
+             xmlns:coreModels="clr-namespace:HourRegistration.Core.Models;assembly=HourRegistration.Core"
+
+             x:Class="BasisUrenregistratie.Views.EmployeeOverview"
+             x:DataType="viewModels:EmployeeOverviewViewModel"
+             Title="Werknemer Overzicht">
+
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Spacing="10" Padding="20">
+
+                <Border Stroke="Black"
+                        StrokeThickness="3"
+                        BackgroundColor="White"
+                        Padding="10,10,10,10">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="15" />
+                    </Border.StrokeShape>
+
+                    <CollectionView ItemsSource="{Binding WeekOverview}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="coreModels:WeeklyDaySummary">
+                                <!-- De rij voor elke dag (een Grid) -->
+                                <Grid Padding="0,2">
+
+                                    <!-- Day name, Day number and month name-->
+                                    <Border Margin="200,0"
+                                            Stroke="black"
+                                            StrokeThickness="2"
+                                            BackgroundColor="white"
+                                            Padding="10,10,10,10">
+
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="15" />
+                                        </Border.StrokeShape>
+
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <Border Grid.Column="0"
+                                                    Stroke="#0096FF"
+                                                    BackgroundColor="#0096FF"
+                                                    Padding="10,10,10,10">
+
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10" />
+                                                </Border.StrokeShape>
+
+                                                <Label Text="{Binding Date, StringFormat='{0:dddd d MMMM}'}"
+                                                       FontSize="Medium"
+                                                       TextColor="White"
+                                                       VerticalOptions="Center" />
+                                            </Border>
+
+                                            <Button Grid.Column="1"
+                                                    Text="uren bon aanmaken"
+                                                    TextColor="White"
+                                                    BackgroundColor="#32CD32"
+                                                    HorizontalOptions="End"
+                                                    IsVisible="{Binding IsDayEmpty}"
+
+                                                    Command="{Binding Source={
+                                                        RelativeSource AncestorType={
+                                                            x:Type viewModels:EmployeeOverviewViewModel}
+                                                            }, Path=NavigateToFormPageCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            <Button Grid.Column="1"
+                                                    Text="uren bon bewerken"
+                                                    TextColor="White"
+                                                    BackgroundColor="#C5C5C5"
+                                                    BorderColor="#928C8C"
+                                                    HorizontalOptions="End"
+                                                    IsVisible="False" 
+                                                    Command="{Binding Source={
+                                                        RelativeSource AncestorType={
+                                                            x:Type viewModels:EmployeeOverviewViewModel}}, 
+                                                            Path=NavigateToFormPageCommand}"
+                                                    CommandParameter="{Binding .}">
+
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" 
+                                                                 Binding="{Binding IsDayEmpty}" 
+                                                                 Value="False">
+                                                        <Setter Property="IsVisible" Value="True" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
