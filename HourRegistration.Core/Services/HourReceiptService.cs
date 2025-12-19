@@ -37,4 +37,14 @@ public class HourReceiptService : IHourReceiptService
     {
         await _hourReceiptRepository.Add(hourReceipt);
     }
+
+    /// <summary>
+    /// Retrieves a specific hour receipt by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the hour receipt to retrieve.</param>
+    /// <returns>A task representing the asynchronous operation, containing the hour receipt that matches the specified identifier.</returns>
+    public Task<HourReceipt?> GetById(int id)
+    {
+        return _hourReceiptRepository.GetById(id);
+    }
 }

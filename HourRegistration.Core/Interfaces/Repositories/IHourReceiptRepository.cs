@@ -27,4 +27,11 @@ public interface IHourReceiptRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task Add(HourReceipt hourReceipt);
 
+    /// <summary>
+    /// Retrieves a specific hour receipt by its identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the hour receipt to be retrieved.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the <see cref="HourReceipt"/> object corresponding to the given identifier.</returns>
+    public Task<HourReceipt?> GetById(int id);
+
 }

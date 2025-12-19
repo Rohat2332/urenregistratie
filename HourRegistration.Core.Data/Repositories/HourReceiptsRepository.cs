@@ -122,6 +122,41 @@ public class HourReceiptsRepository : IHourReceiptRepository
     }
 
     /// <summary>
+    /// Retrieves a specific hour receipt by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the hour receipt to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the <see cref="HourReceipt"/> object if found, or null if no match is found.</returns>
+    /// <exception cref="Exception">Thrown when an error occurs during the retrieval operation.</exception>
+    public async Task<HourReceipt?> GetById(int id)
+    {
+        HourReceipt? hourReceipt = null;
+        const string query = "SELECT * FROM hour_receipts WHERE id = @Id;";
+
+        try
+        {
+            await using var connection = await _databaseConnection.GetOpenConnectionAsync();
+            await using var command = new MySqlCommand(query, connection);
+            
+            command.Parameters.AddWithValue("@Id", id);
+            
+            await using var reader = await command.ExecuteReaderAsync();
+            
+            if (await reader.ReadAsync())
+            {
+                hourReceipt = MapReaderToHourReceipt(reader);
+                
+            }
+
+            return hourReceipt;
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"Error retrieving hour receipt with ID {id}: {e.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Maps a data reader to an HourReceipt object by extracting and converting the appropriate columns.
     /// </summary>
     /// <param name="reader">The MySqlDataReader containing the result set from the database query.</param>
